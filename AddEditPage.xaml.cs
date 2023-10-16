@@ -20,9 +20,52 @@ namespace abdullin_autoservice
     /// </summary>
     public partial class AddEditPage : Page
     {
-        public AddEditPage()
+        private Service _currentService = new Service();
+        public AddEditPage(Service SelectedService)
         {
             InitializeComponent();
+            if (SelectedService != null)
+            {
+                _currentService = SelectedService;
+            }
+            DataContext = _currentService;
+        }
+
+        private void SaveButton_Click(object sender, RoutedEventArgs e)
+        {
+            StringBuilder errors =new StringBuilder();
+            if (string.IsNullOrWhiteSpace(_currentService.Title)) {
+                errors.AppendLine("Укажите название услуги");
+            }
+            if (_currentService.Cost == 0)
+                errors.AppendLine("Укажите стоимость услуги");
+            string s = _currentService.Discount.ToString();
+            if (string.IsNullOrWhiteSpace(s))
+            {
+                errors.AppendLine("Укажите скидку");
+            }
+                
+            if (string.IsNullOrWhiteSpace(_currentService.DurationInSeconds))
+            {
+                errors.AppendLine("Укажите длительность услуги");
+            }
+            if (errors.Length > 0)
+            {
+                MessageBox.Show(errors.ToString());
+                return;
+            }
+            if (_currentService.ID == 0)
+                abdullin_autoserviceEntities.GetContext().Service.Add(_currentService);
+            try
+            {
+                abdullin_autoserviceEntities.GetContext().SaveChanges();
+                MessageBox.Show("Информация сохранена");
+                Manager.MainFrame.GoBack();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message.ToString());
+            }
         }
     }
 }
